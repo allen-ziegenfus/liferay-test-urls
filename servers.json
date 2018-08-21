@@ -1,0 +1,10 @@
+[
+	{
+	"server": "https://www.liferay.com",
+	"host": "www.liferay.com"
+	},
+	{
+	"server": "http://localhost",
+	"host": "localhost"
+	}
+]
