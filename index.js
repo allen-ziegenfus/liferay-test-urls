@@ -1,14 +1,22 @@
-/*jshint esversion: 6 */
+/*	jshint esversion: 6 */
 
 var cheerio = require('cheerio');
 var fs = require('fs');
 var rp = require('request-promise');
-var sanitize = require('sanitize-filename');
+var sanitize_filename = require('sanitize-filename');
 
 var servers = JSON.parse(fs.readFileSync('servers.json'));
-var urlstring = fs.readFileSync('urls.txt').toString();
 
-var urls = urlstring.split('\n');
+var urlstrings = fs.readFileSync('urls.txt').toString();
+
+var urls = urlstrings.split('\n');
+
+var sanitize = function(filename) {
+	var sanitized = filename.replace(/^\//g, '');
+
+	sanitized = sanitized.replace(/\//g, '-slash-');
+	return sanitize_filename(sanitized);
+};
 
 servers.forEach(
 	server => {
@@ -19,14 +27,14 @@ servers.forEach(
 			url => {
 				var requestUrl = server.server + url;
 
-				var crawl = {
+				var crawl_and_parse = {
 					uri: requestUrl,
-					transform: function(body) {
+					transform: function(body, response) {
 						return cheerio.load(body);
 					}
 				};
 
-				rp(crawl).then(
+				rp(crawl_and_parse).then(
 					function($) {
 						console.log('Fetching ' + requestUrl);
 
