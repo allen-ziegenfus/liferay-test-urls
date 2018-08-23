@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 var cheerio = require('cheerio');
 var fs = require('fs');
 var rp = require('request-promise');
@@ -27,6 +29,7 @@ servers.forEach(
 				rp(crawl).then(
 					function($) {
 						console.log('Fetching ' + requestUrl);
+
 						var result = {};
 
 						result['meta-description'] = $('head meta[name="description"]').attr('content');
