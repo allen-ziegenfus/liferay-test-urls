@@ -1,7 +1,7 @@
 {
-  "name": "liferay-test-seo",
+  "name": "liferay-test-urls",
   "version": "1.0.0",
-  "description": "Test SEO",
+  "description": "Test URLs, for example SEO settings and redirects",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

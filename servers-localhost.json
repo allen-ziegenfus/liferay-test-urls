@@ -1,10 +1,10 @@
 [
 	{
-	"server": "https://www.liferay.com",
-	"host": "www.liferay.com"
+		"server": "https://www.liferay.com",
+		"host": "www.liferay.com"
 	},
 	{
-	"server": "http://localhost",
-	"host": "localhost"
+		"server": "http://localhost",
+		"host": "localhost"
 	}
 ]

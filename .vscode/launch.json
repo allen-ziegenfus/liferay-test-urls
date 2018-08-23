@@ -7,8 +7,14 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program",
-			"program": "${workspaceFolder}/index-redirects.js"
+			"name": "Debug Test Redirects",
+			"program": "${workspaceFolder}/test-redirects.js"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Test Urls",
+			"program": "${workspaceFolder}/index.js"
 		}
 	]
 }
