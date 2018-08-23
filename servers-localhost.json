@@ -4,7 +4,7 @@
 	"host": "www.liferay.com"
 	},
 	{
-	"server": "https://www-nightly.liferay.com",
-	"host": "www-nightly.liferay.com"
+	"server": "http://localhost",
+	"host": "localhost"
 	}
 ]

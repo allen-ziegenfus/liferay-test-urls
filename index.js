@@ -1,48 +1,62 @@
+var cheerio = require('cheerio');
+var fs = require('fs');
+var rp = require('request-promise');
+var sanitize = require('sanitize-filename');
 
+var servers = JSON.parse(fs.readFileSync('servers.json'));
+var urlstring = fs.readFileSync('urls.txt').toString();
 
+var urls = urlstring.split('\n');
 
-var sanitize = require("sanitize-filename");
-var fs = require("fs");
-var request = require("request");
-var winston = require("winston");
-var logger = winston.createLogger({
-	level: 'info',
-	transports: [
-		new(winston.transports.Console)()
-	]
-});
+servers.forEach(
+	server => {
+		if (!fs.existsSync(server.host)) {
+			fs.mkdirSync(server.host);
+		}
+		urls.forEach(
+			url => {
+				var requestUrl = server.server + url;
 
-var servers = JSON.parse(fs.readFileSync("servers.json"));
+				var crawl = {
+					uri: requestUrl,
+					transform: function(body) {
+						return cheerio.load(body);
+					}
+				};
 
-const cheerio = require('cheerio');
+				rp(crawl).then(
+					function($) {
+						console.log('Fetching ' + requestUrl);
+						var result = {};
 
-var urlstring= fs.readFileSync("urls.txt").toString();
-var urls = urlstring.split("\n");
+						result['meta-description'] = $('head meta[name="description"]').attr('content');
+						result['og-description'] = $('head meta[property="og:description"]').attr('content');
+						result['og-url'] = $('head meta[property="og:url"]').attr('content');
+						result['og-image'] = $('head meta[property="og:image"]').attr('content');
+						result['og-title'] = $('head meta[property="og:title"]').attr('content');
+						result.title = $('head title').text();
+						result.url = url;
 
+						servers.forEach(
+							server => {
+								result['og-url'] = result['og-url'].replace(server.server, '');
+								result['og-image'] = result['og-image'].replace(server.server, '');
+							}
+						);
 
-servers.forEach(server => {
-	if (!fs.existsSync(server.host)){
-		fs.mkdirSync(server.host);
+						fs.writeFileSync('./' + server.host + '/' + sanitize(url) + '.json', JSON.stringify(result, null, '\t'));
+					}
+				).catch(
+					function(err) {
+						var result = {};
+
+						result.error = err.statusCode;
+						result.url = url;
+
+						fs.writeFileSync('./' + server.host + '/' + sanitize(url) + '.json', JSON.stringify(result, null, '\t'));
+					}
+				);
+			}
+		);
 	}
-	urls.forEach(url => {
-		console.log(url);
-
-		var requestUrl = server.server + url;
-		console.log(requestUrl);
-		request.get(requestUrl, function(err, httpResponse, body) {
-			console.log(httpResponse.statusCode);
-			const markup = cheerio.load(body);
-
-			var result = {};
-			result['meta-description'] = markup('head meta[name="description"]').attr('content');
-			result['og-description'] = markup('head meta[property="og:description"]').attr('content');
-			result['og-url'] = markup('head meta[property="og:url"]').attr('content');
-			result['og-image'] = markup('head meta[property="og:image"]').attr('content');
-			result['og-title'] = markup('head meta[property="og:title"]').attr('content');
-			result['title'] = markup('head title').text();
-
-			fs.writeFileSync("./" + server.host + "/" + sanitize(url) + ".json", JSON.stringify(result, null, '\t'));
-		});
-	});
-
-});
+);
