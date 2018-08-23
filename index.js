@@ -18,10 +18,22 @@ var sanitize = function(filename) {
 	return sanitize_filename(sanitized);
 };
 
+var resultsDirectoryRoot = './urls';
+
+if (!fs.existsSync(resultsDirectoryRoot)) {
+	fs.mkdirSync(resultsDirectoryRoot);
+}
+
+var writeResult = function(resultsDirectory, filename, result) {
+	fs.writeFileSync(resultsDirectory + '/' + sanitize(filename) + '.json', JSON.stringify(result, null, '\t'));
+};
+
 servers.forEach(
 	server => {
-		if (!fs.existsSync(server.host)) {
-			fs.mkdirSync(server.host);
+		var resultsDirectory = resultsDirectoryRoot + '/' + server.host;
+
+		if (!fs.existsSync(resultsDirectory)) {
+			fs.mkdirSync(resultsDirectory);
 		}
 		urls.forEach(
 			url => {
@@ -55,7 +67,7 @@ servers.forEach(
 							}
 						);
 
-						fs.writeFileSync('./' + server.host + '/' + sanitize(url) + '.json', JSON.stringify(result, null, '\t'));
+						writeResult(resultsDirectory, url, result);
 					}
 				).catch(
 					function(err) {
@@ -64,7 +76,7 @@ servers.forEach(
 						result.error = err.statusCode;
 						result.url = url;
 
-						fs.writeFileSync('./' + server.host + '/' + sanitize(url) + '.json', JSON.stringify(result, null, '\t'));
+						writeResult(resultsDirectory, url, result);
 					}
 				);
 			}

@@ -17,10 +17,23 @@ var sanitize = function(filename) {
 	return sanitize_filename(sanitized);
 };
 
+
+var resultsDirectoryRoot = './redirects';
+
+if (!fs.existsSync(resultsDirectoryRoot)) {
+	fs.mkdirSync(resultsDirectoryRoot);
+}
+
+var writeResult = function(resultsDirectory, filename, result) {
+	fs.writeFileSync('./' + resultsDirectory + '/' + sanitize(filename) + '.json', JSON.stringify(result, null, '\t'));
+};
+
 servers.forEach(
 	server => {
-		if (!fs.existsSync(server.host)) {
-			fs.mkdirSync(server.host);
+		var resultsDirectory = resultsDirectoryRoot + '/' + server.host;
+
+		if (!fs.existsSync(resultsDirectory)) {
+			fs.mkdirSync(resultsDirectory);
 		}
 		redirects.forEach(
 			redirect => {
@@ -39,7 +52,7 @@ servers.forEach(
 						result.response = response.statusCode;
 						result.url = redirect;
 
-						fs.writeFileSync('./' + server.host + '/' + sanitize(redirect) + '.json', JSON.stringify(result, null, '\t'));
+						writeResult(resultsDirectory, redirect, result);
 					}
 				).catch(
 					function(response) {
@@ -54,7 +67,7 @@ servers.forEach(
 							result.location = result.location.replace('-uat', '');
 						}
 
-						fs.writeFileSync('./' + server.host + '/' + sanitize(redirect) + '.json', JSON.stringify(result, null, '\t'));
+						writeResult(resultsDirectory, redirect, result);
 					}
 				);
 			}
